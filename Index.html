@@ -1,0 +1,13 @@
+# format of the link
+$server/channel/$youtube_channel_id.json
+
+# example
+$server/channel/UCt4t-jeY85JegMlZ-E5UWtA.json
+
+# response
+{
+  "name": "<string>", # name of youtube channel
+  "logo": "<url>", # logo of youtube channel
+  "stream": "<url>/index.m3u8", # hls of youtube video
+  "status":  <http_code> # response code from youtube
+}
