@@ -1,60 +1,27 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>JW Player with ClearKey DRM</title>
-    <!-- Include the JW Player library -->
-    <script src="//content.jwplatform.com/libraries/SAHhwvZq.js"></script>
-</head>
-<body>
+import requests
+import re
 
-<div id="player"></div>
+print('test link: https://player.restream.io/?token=2c8a9196085b4e1c9c25450451f55bd8&vwrs=1\n')
 
-<script>
-// The provided URL with the DRM parameters
-var input_url ="https://varun-iptv.netlify.app/m3u/discoverybengali.m3u8|drmScheme=clearkey&drmLicense=9ecad6c4413f8bdc54712ce6c072a2cf:442df559c369bdada8ba3abe97811575";
+link = input('link: ')
+link_id = re.findall(r'token=(.*)&', link)[0].strip()
 
-// Extract the base URL and DRM license keys
-var parts = input_url.split('|');
-var url = parts[0]; // The DASH MPD URL
-var query_string = parts[1];
-
-var params = new URLSearchParams(query_string);
-var drmScheme = params.get('drmScheme');
-var drmLicense = params.get('drmLicense');
-
-var k1, k2;
-
-if (drmScheme === 'clearkey' && drmLicense) {
-    [k1, k2] = drmLicense.split(':');
+headers = {
+    'authority': 'player-backend.restream.io',
+    'content-type': 'application/json',
+    'origin': 'https://player.restream.io',
+    'player-version': '0.9.2',
+    'referer': 'https://player.restream.io/',
+    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
 }
 
-// Setup JW Player if the URL and keys are present
-if (url && k1 && k2) {
-    jwplayer("player").setup({
-        playlist: [{
-            sources: [{
-                file: url,
-                drm: {
-                    clearkey: {
-                        keyId: k1,
-                        key: k2
-                    }
-                }
-            }]
-        }],
-        autostart: true,
-        width: "100%", 
-        height: "100%", 
-        stretching: "exactfit",
-        aspectratio: "16:9",
-        cast: {} // Enabling Chromecast support
-    });
-} else {
-    console.error("Failed to extract DRM keys or URL from the input.");
+params = {
+    'instant': 'true',
 }
-</script>
 
-</body>
-</html>
+response = requests.get('https://player-backend.restream.io/public/videos/'+link_id+'', params=params, headers=headers).json()
+
+videoUrlDash = response['videoUrlDash']
+print(f'\nmpd link: \n{videoUrlDash}')
+videoUrlHls = response['videoUrlHls']
+print(f'\nm3u8 link: \n{videoUrlHls}')
