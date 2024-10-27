@@ -1,27 +1,27 @@
-import requests
-import re
-
-print('test link: https://player.restream.io/?token=2c8a9196085b4e1c9c25450451f55bd8&vwrs=1\n')
-
-link = input('link: ')
-link_id = re.findall(r'token=(.*)&', link)[0].strip()
-
-headers = {
-    'authority': 'player-backend.restream.io',
-    'content-type': 'application/json',
-    'origin': 'https://player.restream.io',
-    'player-version': '0.9.2',
-    'referer': 'https://player.restream.io/',
-    'user-agent': 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/102.0.0.0 Safari/537.36',
-}
-
-params = {
-    'instant': 'true',
-}
-
-response = requests.get('https://player-backend.restream.io/public/videos/'+link_id+'', params=params, headers=headers).json()
-
-videoUrlDash = response['videoUrlDash']
-print(f'\nmpd link: \n{videoUrlDash}')
-videoUrlHls = response['videoUrlHls']
-print(f'\nm3u8 link: \n{videoUrlHls}')
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<!-- Or if you want a more recent canary version -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/hls.js@canary"></script> -->
+<video id="video"></video>
+<script>
+  const src = 'https://video.twimg.com/amplify_video/1158708708068745216/pl/480x480/XwDJBf-F7tIeXR9O.m3u8';
+  var video = document.getElementById('video');
+  if(Hls.isSupported()) {
+    var hls = new Hls();
+    hls.loadSource(src);
+    hls.attachMedia(video);
+    hls.on(Hls.Events.MANIFEST_PARSED,function() {
+      video.play();
+  });
+ }
+ // hls.js is not supported on platforms that do not have Media Source Extensions (MSE) enabled.
+ // When the browser has built-in HLS support (check using `canPlayType`), we can provide an HLS manifest (i.e. .m3u8 URL) directly to the video element through the `src` property.
+ // This is using the built-in support of the plain video element, without using hls.js.
+ // Note: it would be more normal to wait on the 'canplay' event below however on Safari (where you are most likely to find built-in HLS support) the video.src URL must be on the user-driven
+ // white-list before a 'canplay' event will be emitted; the last video event that can be reliably listened-for when the URL is not on the white-list is 'loadedmetadata'.
+  else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = src;
+    video.addEventListener('loadedmetadata',function() {
+      video.play();
+    });
+  }
+</script>
